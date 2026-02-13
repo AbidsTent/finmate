@@ -34,6 +34,115 @@ body {
   gap: 30px;
 }
 
+/* ===== Profile dropdown ===== */
+.profileWrap{
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.profileMenu{
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: min(380px, 92vw);
+  border-radius: 18px;
+  padding: 14px;
+  background: rgba(10, 14, 28, .96);
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 60px rgba(0,0,0,.45);
+  backdrop-filter: blur(12px);
+  display: none;
+  z-index: 999;
+}
+
+.profileMenu.open{ display: block; }
+
+.pmHeader{ padding: 6px 6px 10px; }
+.pmHello{ font-size: 28px; font-weight: 800; letter-spacing: .2px; }
+.pmMeta{ margin-top: 6px; color: var(--muted); font-size: 14px; }
+
+.pmActions{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 10px 6px 6px;
+}
+
+.pmCircle{
+  border: none;
+  background: rgba(39,209,127,.18);
+  border: 1px solid rgba(39,209,127,.22);
+  border-radius: 18px;
+  padding: 14px 10px;
+  cursor: pointer;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.pmCircle:hover{ background: rgba(39,209,127,.26); }
+
+.pmIcon{ font-size: 22px; }
+.pmLabel{ font-size: 13px; color: var(--text); opacity: .95; }
+
+.pmLinks{
+  margin-top: 12px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  padding-top: 10px;
+}
+
+.pmLink{
+  width: 100%;
+  display: grid;
+  grid-template-columns: 26px 1fr 16px;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 10px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.06);
+  color: var(--text);
+  cursor: pointer;
+  margin-bottom: 10px;
+  text-align: left;
+}
+.pmLink:hover{ background: rgba(255,255,255,.08); }
+
+.pmLeft{ opacity: .95; }
+.pmRight{ color: var(--muted); }
+
+.pmLogout{
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 80, 80, .18);
+  border: 1px solid rgba(255, 80, 80, .22);
+  color: var(--text);
+  font-weight: 700;
+}
+.pmLogout:hover{ background: rgba(255, 80, 80, .26); }
+
+.btn.btn-secondary{
+  background: rgba(234,240,255,.06);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.pmAuthBtns{
+  display:flex;
+  gap:10px;
+  padding: 10px 6px 6px;
+}
+
+.pmAuthPrimary, .pmAuthSecondary{
+  flex:1;
+  text-align:center;
+}
+
 /* Logo updated */
 .logo{
   display:flex;
@@ -423,4 +532,5 @@ h1{ margin:0 0 6px; font-size:2.2rem; }
 }
 .chartCaption{
   position:absolute; left:14px; right:14px; bottom:12px;
+}
 }
