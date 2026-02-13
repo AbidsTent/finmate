@@ -1,5 +1,6 @@
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
 
 const { getExpenses, addExpense, deleteExpenseById } = require("./data");
 
@@ -58,6 +59,22 @@ app.post("/api/expenses", (req, res) => {
   return res.status(201).json(newExpense); // 201 Created
 });
 
+app.get("/api/invest", (req, res) => {
+  // read invest.json from server folder (adjust path if yours differs)
+  const dataPath = path.join(__dirname, "src", "data", "invest.json");
+  fs.readFile(dataPath, "utf8", (err, data) => {
+    if (err) {
+      console.error("Error reading invest.json:", err);
+      return res.status(500).json({ error: "Failed to load invest data" });
+    }
+
+    try {
+      return res.status(200).json(JSON.parse(data)); // 200 OK
+    } catch (parseError) {
+      return res.status(500).json({ error: "Invalid invest JSON format" });
+    }
+  });
+});
 // DELETE remove an expense by id
 app.delete("/api/expenses/:id", (req, res) => {
   const deleted = deleteExpenseById(req.params.id);
