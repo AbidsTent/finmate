@@ -5,25 +5,28 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Personal Finance Hub</title>
-  <link rel="stylesheet" href="./css/styles.css" />
+  <link rel="stylesheet" href="./css/style.css" />
 </head>
 
 <body>
   <nav class="navbar">
     <div class="nav-left">
-      <div class="logo">Finmate</div>
+      <div class="logo">
+        <img src="./assets/finmate-logo-Photoroom.png" alt="Finmate logo" class="logo-icon" />
+        <span>Finmate</span>
+      </div>
     </div>
 
     <div class="nav-right">
       <div class="nav-links">
-        <a href="index.html" class="active">Home</a>
+        <a href="home.html" class="active">Home</a>
         <a href="expense.html">Expenses</a>
         <a href="invest.html">Investments</a>
       </div>
-
       <div class="user-avatar" title="Account">👤</div>
     </div>
   </nav>
+
 
 
 
@@ -35,143 +38,101 @@
       </div>
 
       <div class="controls">
-        <select class="select">
-          <option>Last 30 Days</option>
-          <option>Last 7 Days</option>
-          <option>This Month</option>
-        </select>
-        <a class="btn" href="./expenses.html">+ Add Transaction</a>
+        <select class="select" id="rangeSelect">
+  <option value="30">Last 30 Days</option>
+  <option value="7">Last 7 Days</option>
+  <option value="month">This Month</option>
+</select>
+
+        <a class="btn" href="./expense.html">+ Add Transaction</a>
       </div>
     </header>
 
-   <section class="cards">
-  <div class="card">
-    <div class="label">Available Balance</div>
-    <div class="value" id="availableBalance">$—</div>
-    <div class="hint muted">Based on server summary</div>
-  </div>
-
-  <div class="card">
-    <div class="label">Monthly Subscriptions</div>
-    <div class="value" id="subsMonthly">$—</div>
-    <div class="hint muted">Recurring costs</div>
-  </div>
-
-  <div class="card">
-    <div class="label">Total Expenses</div>
-    <div class="value" id="totalExpenses">$—</div>
-    <div class="hint muted">Spending in list</div>
-  </div>
-
-  <div class="card">
-    <div class="label">Investment Cost Basis</div>
-    <div class="value" id="investCost">$—</div>
-    <div class="hint muted">Shares × avg cost</div>
-  </div>
-</section>
-<div class="sectionTitle">
-  <span>Overview</span>
-  <span class="muted small">Last 30 days</span>
-</div>
-
-<!-- ✅ Analytics row (3 equal cards) -->
-<section class="analytics">
-  <!-- 1) Category Breakdown -->
-  <div class="panelCard">
-    <h3>Category Breakdown</h3>
-    <div class="chartWrap">
-      <canvas id="categoryChart"></canvas>
-    </div>
-  </div>
-
-  <!-- 2) Spendings -->
-  <div class="panelCard">
-    <div class="panelHeader">
-      <h3>Spendings</h3>
-      <span class="muted small">This month</span>
-    </div>
-
-    <div class="spendList">
-      <div class="spendItem">
-        <div class="spendLeft">
-          <div class="spendIcon">🏠</div>
-          <div>
-            <div class="spendTitle">Rent</div>
-            <div class="muted small">Housing</div>
-          </div>
-        </div>
-        <div class="spendAmount">$1,200</div>
+    <section class="cards">
+      <div class="card">
+        <div class="label">Available Balance</div>
+        <div class="value" id="availableBalance">$—</div>
+        <div class="hint muted">Based on server summary</div>
       </div>
 
-      <div class="spendItem">
-        <div class="spendLeft">
-          <div class="spendIcon">🍔</div>
-          <div>
-            <div class="spendTitle">Food</div>
-            <div class="muted small">Dining & groceries</div>
-          </div>
-        </div>
-        <div class="spendAmount">$500</div>
+      <div class="card">
+        <div class="label">Monthly Subscriptions</div>
+        <div class="value" id="subsMonthly">$—</div>
+        <div class="hint muted">Recurring costs</div>
       </div>
 
-      <div class="spendItem">
-        <div class="spendLeft">
-          <div class="spendIcon">🔁</div>
-          <div>
-            <div class="spendTitle">Subscriptions</div>
-            <div class="muted small">Recurring</div>
-          </div>
-        </div>
-        <div class="spendAmount">$150</div>
+      <div class="card">
+        <div class="label">Total Expenses</div>
+        <div class="value" id="totalExpenses">$—</div>
+        <div class="hint muted">Spending in list</div>
       </div>
 
-      <div class="spendItem">
-        <div class="spendLeft">
-          <div class="spendIcon">📈</div>
-          <div>
-            <div class="spendTitle">Investments</div>
-            <div class="muted small">Contributions</div>
-          </div>
-        </div>
-        <div class="spendAmount">$400</div>
+      <div class="card">
+        <div class="label">Investment Cost Basis</div>
+        <div class="value" id="investCost">$—</div>
+        <div class="hint muted">Shares × avg cost</div>
       </div>
+    </section>
+    <div class="sectionTitle">
+      <span>Overview</span>
+      <span class="muted small">Last 30 days</span>
     </div>
-  </div>
 
-  <!-- 3) Income vs Expenses -->
-  <div class="panelCard">
-    <h3>Income vs Expenses</h3>
-    <div class="chartWrap">
-      <canvas id="trendChart"></canvas>
-    </div>
-  </div>
-</section>
+    <!-- ✅ Analytics row (3 equal cards) -->
+    <section class="analytics">
+      <!-- 1) Category Breakdown -->
+      <div class="panelCard">
+        <h3>Category Breakdown</h3>
+        <div class="chartWrap">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+
+      <!-- 2) Spendings -->
+      <div class="panelCard">
+        <div class="panelHeader">
+          <h3>Top Spendings</h3>
+          <span class="muted small">This month</span>
+        </div>
+
+        <div class="spendList" id="spendList"></div>
+
+      </div>
+
+      <!-- 3) Income vs Expenses -->
+      <div class="panelCard">
+        <h3>Income vs Expenses</h3>
+        <div class="chartWrap">
+          <canvas id="trendChart"></canvas>
+        </div>
+      </div>
+    </section>
 
 
     <section class="smartTipsSection">
-  <div class="smartTipsInner">
+      <div class="smartTipsInner">
 
-    <div class="panelHeader">
-      <h3>Smart Tips</h3>
-      <span class="muted small" id="tipsStatus"></span>
-    </div>
+        <div class="panelHeader">
+          <h3>Smart Tips</h3>
+          <span class="muted small" id="tipsStatus"></span>
+        </div>
 
-    <!-- Loading / Progress -->
-    <div class="tipsProgress">
-      <div class="tipsProgressTop">
-        <span class="muted small">Generating tips</span>
-        <span class="tipsPercent" id="tipsPercent">0%</span>
+        <!-- Loading / Progress -->
+        <div class="tipsProgress">
+          <div class="tipsProgressTop">
+            <span class="muted small">Generating tips</span>
+            <span class="tipsPercent" id="tipsPercent">0%</span>
+          </div>
+
+          <div class="tipsBar">
+            <div class="tipsFill" id="tipsFill"></div>
+          </div>
+        </div>
+
+        <!-- Tips will appear here -->
+        <div class="tipsList" id="tipsList"></div>
       </div>
-
-      <div class="tipsBar">
-        <div class="tipsFill" id="tipsFill"></div>
-      </div>
-    </div>
-
-    <!-- Tips will appear here -->
-    <div class="tipsList" id="tipsList"></div>
-    </div>
-</section>
+    </section>
 
 
 
