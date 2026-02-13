@@ -9,18 +9,17 @@
 <body>
   <!-- navbar -->
   <nav class="navbar">
-    <div class="nav-left">
-      <div class="logo">Finmate</div>
+    <div class="logo">
+      <img src="./assets/finmate-logo-Photoroom.png" alt="Finmate logo" class="logo-icon" />
+      <span>Finmate</span>
     </div>
-
     <div class="nav-right">
       <div class="nav-links">
         <a href="./home.html">Home</a>
-        <a href="subscriptions.html">Subscriptions</a>
         <a href="./expense.html">Expenses</a>
         <a href="./invest.html" class="active">Investments</a>
       </div>
-      <button class="btn btn-secondary btn-sm" id="refreshBtn" type="button" style="margin-left: 10px;">↻ Refresh</button>
+      <!-- <button class="btn btn-secondary btn-sm" id="refreshBtn" type="button" style="margin-left: 10px;">↻ Refresh</button> -->      
       <div class="profileWrap">
   <button class="user-avatar" id="profileBtn" type="button" title="Account">👤</button>
 
@@ -76,22 +75,7 @@
     </header>
 
     <section class="invest-grid">
-      <!-- Watchlist -->
-      <section class="card panel">
-        <div class="panel-head">
-          <h2>Watchlist</h2>
-          <span class="muted small" id="watchCount">0</span>
-          <button class="iconBtn" id="openWatchModalBtn" type="button" aria-label="Add Ticker">+</button>
-        </div>
-
-        <div class="tableWrap">
-          <table class="table">
-            <thead><tr><th>Ticker</th><th>Price</th></tr></thead>
-            <tbody id="watchlistBody"></tbody>
-          </table>
-        </div>
-      </section>
-
+      
       <!-- Portfolio -->
       <section class="card panel">
         <div class="panel-head">
@@ -118,13 +102,29 @@
 
         <div class="tableWrap">
           <table class="table">
-            <thead><tr><th>Ticker</th><th>Buy</th><th>Now</th><th>Shares</th></tr></thead>
+            <thead><tr><th>Ticker</th><th>Buy</th><th>Now</th><th>Shares</th><th>Value</th><th>P/L %</th><th style="text-align: right;">Remove</th></tr></thead>
             <tbody id="portfolioBody"></tbody>
           </table>
         </div>
 
         <div class="error muted" id="errorBox" style="display:none;"></div>
       </section>
+      <!-- Watchlist -->
+      <section class="card panel">
+        <div class="panel-head">
+          <h2>Watchlist</h2>
+          <span class="muted small" id="watchCount">0</span>
+          <button class="iconBtn" id="openWatchModalBtn" type="button" aria-label="Add Ticker">+</button>
+        </div>
+        
+        <div class="tableWrap">
+          <table class="table">
+            <thead><tr><th>Ticker</th><th>Price</th><th style="text-align: right;">Remove</th></tr></thead>
+            <tbody id="watchlistBody"></tbody>
+          </table>
+        </div>
+      </section>
+
       <!-- 3) CHART -->
       <section class="card panel">
         <div class="panel-head">

@@ -605,6 +605,28 @@ h1 {
   margin-top: 12px;
 }
 
+/* Added missing helper styles used by invest.html */
+.btn-sm { padding: 8px 10px; border-radius: 10px; font-size: 0.9rem; }
+.btn-secondary {
+  background: rgba(234,240,255,.06);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover { background: rgba(234,240,255,.12); }
+
+.form { display: grid; gap: 10px; }
+.field { display: grid; gap: 6px; }
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(234,240,255,.06);
+  color: var(--text);
+  outline: none;
+}
+.input::placeholder { color: rgba(169,182,214,.75); }
+
 /* ================= CHART ================= */
 
 #categoryPie {
