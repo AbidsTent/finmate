@@ -9,20 +9,23 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "..", "public")));
 
 connectDB();
 
+const publicPath = path.join(__dirname, "..", "frontend", "public");
+
+app.use(express.static(publicPath));
+
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "public", "home.html"));
+  res.sendFile(path.join(publicPath, "home.html"));
 });
 
 app.get("/expenses", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "public", "expense.html"));
+  res.sendFile(path.join(publicPath, "expense.html"));
 });
 
 app.get("/investments", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "public", "invest.html"));
+  res.sendFile(path.join(publicPath, "invest.html"));
 });
 
 app.get("/api/test-db", (req, res) => {
