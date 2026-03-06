@@ -121,16 +121,27 @@ function renderExpenses(expenses) {
       <td>${money(e.amount)}</td>
       <td>${e.date}</td>
       <td>
-        <button class="btn btn-secondary" data-id="${e.id}">Delete</button>
+        <div class="action-buttons">
+          <button class="btn btn-primary edit-btn" data-id="${e.id}">Edit</button>
+          <button class="btn btn-secondary delete-btn" data-id="${e.id}">Delete</button>
+        </div>
       </td>
     `;
     tbody.appendChild(tr);
   });
 
   // DELETE buttons
-  tbody.querySelectorAll("button[data-id]").forEach((btn) => {
+  tbody.querySelectorAll(".delete-btn").forEach((btn) => {
     btn.addEventListener("click", async () => {
       await deleteExpense(btn.dataset.id);
+    }); 
+  });
+
+// EDIT buttons
+  tbody.querySelectorAll(".edit-btn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = btn.dataset.id;
+      editExpense(id);
     });
   });
 }
@@ -195,6 +206,51 @@ async function deleteExpense(id) {
     await loadExpenses();
   } catch {
     setMsg(listMsg, "Server error: could not delete expense.");
+  }
+}
+async function editExpense(id) {
+
+  const res = await fetch(`/api/expenses`);
+  const expenses = await res.json();
+
+  const current = expenses.find(e => e.id === id);
+
+  if (!current) {
+    alert("Expense not found");
+    return;
+  }
+
+  const title = prompt("Edit item:", current.title);
+  const amount = prompt("Edit amount:", current.amount);
+  const category = prompt("Edit category:", current.category);
+  const date = prompt("Edit date:", current.date);
+
+  const updatedExpense = {
+    title: title || current.title,
+    amount: amount || current.amount,
+    category: category || current.category,
+    date: date || current.date
+  };
+
+  try {
+    const updateRes = await fetch(`/api/expenses/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(updatedExpense)
+    });
+
+    if (!updateRes.ok) {
+      const err = await updateRes.json();
+      alert(err.message || "Failed to update expense.");
+      return;
+    }
+
+    await loadExpenses();
+
+  } catch (err) {
+    alert("Server error while updating.");
   }
 }
 

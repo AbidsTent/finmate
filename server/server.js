@@ -72,6 +72,43 @@ app.get("/api/invest", (req, res) => {
   });
 });
 
+// UPDATE expense
+app.put("/api/expenses/:id", (req, res) => {
+  const { title, amount, category, date } = req.body;
+
+  if (!title || amount === undefined || !category || !date) {
+    return res.status(400).json({
+      message: "Missing required fields: title, amount, category, date",
+    });
+  }
+
+  const numAmount = Number(amount);
+  if (Number.isNaN(numAmount) || numAmount <= 0) {
+    return res.status(400).json({ message: "Amount must be a positive number" });
+  }
+
+  const expenses = getExpenses();
+  const index = expenses.findIndex((e) => e.id === req.params.id);
+
+  if (index === -1) {
+    return res.status(404).json({ message: "Expense not found" });
+  }
+
+  expenses[index] = {
+    ...expenses[index],
+    title,
+    amount: numAmount,
+    category,
+    date,
+  };
+
+  // save file
+  const dataPath = path.join(__dirname, "src", "data", "expenses.json");
+  fs.writeFileSync(dataPath, JSON.stringify(expenses, null, 2));
+
+  return res.status(200).json(expenses[index]);
+});
+
 app.delete("/api/expenses/:id", (req, res) => {
   const deleted = deleteExpenseById(req.params.id);
 

@@ -165,6 +165,11 @@ h1{ margin:0 0 6px; font-size:2.2rem; }
   padding:10px 14px;
   border-radius:12px;
 }
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 
 /* ================= CARDS ================= */
 
@@ -184,6 +189,7 @@ h1{ margin:0 0 6px; font-size:2.2rem; }
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 16px;
+  overflow-x: hidden;
   box-shadow: 0 10px 30px rgba(0,0,0,.20);
 }
 
@@ -235,7 +241,6 @@ h1{ margin:0 0 6px; font-size:2.2rem; }
   max-height: 360px;  
   overflow-y: auto;
 }
-
 .budgetInput {
   width: 140px;
   padding: 10px 12px;
@@ -263,7 +268,6 @@ h1{ margin:0 0 6px; font-size:2.2rem; }
   -webkit-appearance: none;
   margin: 0;
 }
-
 
 
 .form .field{
@@ -294,11 +298,21 @@ h1{ margin:0 0 6px; font-size:2.2rem; }
 
 .table{
   width:100%;
-  border-collapse: collapse;
-  min-width: 560px;
+  table-layout: auto;
   background: rgba(18, 26, 43, 0.35);
 }
-
+.table thead th {
+  position: sticky;
+  top: 0;
+  background: #0b1730;
+  z-index: 10;
+}
+td, th {
+  white-space: nowrap;
+}
+td:last-child {
+  width: 120px;
+}
 .table th, .table td{
   padding: 12px;
   border-bottom: 1px solid var(--border);
@@ -318,6 +332,9 @@ h1{ margin:0 0 6px; font-size:2.2rem; }
 
 .btn.btn-secondary:hover{
   background: rgba(234,240,255,.16);
+}
+.btn-primary:hover {
+  background: #06e970;
 }
 
 /* ================= CHART ================= */
