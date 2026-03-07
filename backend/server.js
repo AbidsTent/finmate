@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 const dotenv = require("dotenv");
 const { connectDB } = require("./config/db");
+const expenseRoutes = require("./routes/expense");
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
@@ -11,6 +12,8 @@ const PORT = process.env.PORT || 8080;
 app.use(express.json());
 
 connectDB();
+
+app.use("/api/expenses", expenseRoutes);
 
 const publicPath = path.join(__dirname, "..", "frontend", "public");
 
@@ -26,10 +29,6 @@ app.get("/expenses", (req, res) => {
 
 app.get("/investments", (req, res) => {
   res.sendFile(path.join(publicPath, "invest.html"));
-});
-
-app.get("/api/test-db", (req, res) => {
-  res.json({ message: "MongoDB connection is working" });
 });
 
 app.listen(PORT, () => {

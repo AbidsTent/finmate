@@ -34,28 +34,9 @@ function money(n) {
   return `$${Number(n).toFixed(2)}`;
 }
 
-// // (1) Welcome back <name>
-// // =====================
-// const USER_KEY = "finmate_username";
-
-// function getUserName() {
-//   let name = localStorage.getItem(USER_KEY);
-//   if (!name) {
-//     name = prompt("Enter your name (for Welcome message):") || "there";
-//     name = name.trim() || "there";
-//     localStorage.setItem(USER_KEY, name);
-//   }
-//   return name;
-// }
-
-// (function setWelcomeMessage() {
-//   if (!welcomeTitle) return;
-//   const name = getUserName();
-//   welcomeTitle.textContent = `Welcome back ${name} 👋`;
-// })();
 
 // =====================
-// (2) Budget (client-side only for A1)
+// Budget (client-side only for A1)
 // =====================
 const BUDGET_KEY = "finmate_budget";
 
@@ -109,7 +90,7 @@ async function loadExpenses() {
   }
 }
 
-function renderExpenses(expenses) {
+  function renderExpenses(expenses) {
   if (!tbody) return;
   tbody.innerHTML = "";
 
@@ -121,11 +102,25 @@ function renderExpenses(expenses) {
       <td>${money(e.amount)}</td>
       <td>${e.date}</td>
       <td>
-        <button class="btn btn-secondary" data-id="${e.id}">Delete</button>
+        <button class="btn edit-expense-btn" data-id="${e._id}" type="button">Edit</button>
+        <button class="btn btn-secondary delete-expense-btn" data-id="${e._id}" type="button">Delete</button>
       </td>
     `;
     tbody.appendChild(tr);
   });
+
+  tbody.querySelectorAll(".edit-expense-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      editExpense(btn.dataset.id, expenses);
+    });
+  });
+
+  tbody.querySelectorAll(".delete-expense-btn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      await deleteExpense(btn.dataset.id);
+    });
+  });
+}
 
   // DELETE buttons
   tbody.querySelectorAll("button[data-id]").forEach((btn) => {
@@ -133,7 +128,7 @@ function renderExpenses(expenses) {
       await deleteExpense(btn.dataset.id);
     });
   });
-}
+
 
 function renderTotals(expenses) {
   const spent = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
@@ -195,6 +190,45 @@ async function deleteExpense(id) {
     await loadExpenses();
   } catch {
     setMsg(listMsg, "Server error: could not delete expense.");
+  }
+}
+async function editExpense(id, expenses) {
+  const current = expenses.find((e) => e._id === id);
+
+  if (!current) {
+    alert("Expense not found");
+    return;
+  }
+
+  const title = prompt("Edit item:", current.title);
+  const category = prompt("Edit category:", current.category);
+  const amount = prompt("Edit amount:", current.amount);
+  const date = prompt("Edit date:", current.date);
+
+  try {
+    const res = await fetch(`/api/expenses/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title,
+        category,
+        amount,
+        date,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Failed to update expense");
+      return;
+    }
+
+    await loadExpenses();
+  } catch {
+    alert("Server error while updating expense");
   }
 }
 
