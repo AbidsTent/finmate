@@ -1,6 +1,5 @@
 let watchlist = [];
 let portfolio = [];
-let rawInvestData = null;
 
 const $ = (id) => document.getElementById(id);
 const fmt = (n) =>
@@ -8,13 +7,60 @@ const fmt = (n) =>
 
 let modalMode = "portfolio";
 let activeRange = "1M";
-let editingTicker = null;
+let editingInvestmentId = null;
+
+const API_URL = "/api/investments";
 const chartSeries = {
   "1D": [],
   "1W": [],
   "1M": [],
   "1Y": [],
 };
+
+/* =========================
+   API helpers
+========================= */
+
+async function fetchInvestments() {
+  const res = await fetch(API_URL);
+  if (!res.ok) throw new Error("Failed to fetch investments");
+  return res.json();
+}
+
+async function createInvestment(data) {
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) throw new Error("Failed to create investment");
+  return res.json();
+}
+
+async function updateInvestment(id, data) {
+  const res = await fetch(`${API_URL}/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) throw new Error("Failed to update investment");
+  return res.json();
+}
+
+async function deleteInvestment(id) {
+  const res = await fetch(`${API_URL}/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!res.ok) throw new Error("Failed to delete investment");
+  return res.json();
+}
+
+/* =========================
+   Utility / UI helpers
+========================= */
 
 function showError(msg) {
   const box = $("errorBox");
@@ -29,18 +75,20 @@ function showError(msg) {
 }
 
 async function loadData() {
-  const res = await fetch("/api/invest");
-  if (!res.ok) throw new Error("Failed to fetch data");
+  const investments = await fetchInvestments();
 
-  rawInvestData = await res.json();
-
-  watchlist = (rawInvestData.watchlist || []).map((w) => ({
-    ...w,
-    prev: w.price,
+  portfolio = investments.map((p) => ({
+    ...p,
+    current: Number(p.current || 0),
+    buyPrice: Number(p.buyPrice || 0),
+    shares: Number(p.shares || 0),
   }));
 
-  portfolio = (rawInvestData.portfolio || []).map((p) => ({
-    ...p,
+  // Watchlist stays frontend-only for now
+  watchlist = watchlist.map((w) => ({
+    ...w,
+    price: Number(w.price || 0),
+    prev: Number(w.prev ?? w.price ?? 0),
   }));
 
   initializeChartHistory();
@@ -95,7 +143,8 @@ function renderPortfolio() {
     const tr = document.createElement("tr");
 
     const value = p.current * p.shares;
-    const plPercent = p.buyPrice > 0 ? ((p.current - p.buyPrice) / p.buyPrice) * 100 : 0;
+    const plPercent =
+      p.buyPrice > 0 ? ((p.current - p.buyPrice) / p.buyPrice) * 100 : 0;
     const plColor = plPercent >= 0 ? "#38d39f" : "#ff6b6b";
 
     tr.innerHTML = `
@@ -106,31 +155,35 @@ function renderPortfolio() {
       <td>${fmt(value)}</td>
       <td style="color:${plColor}">${plPercent.toFixed(2)}%</td>
       <td style="text-align:right; white-space:nowrap;">
-        <button class="iconBtn btn-sm editBtn" type="button" data-edit-port="${p.ticker}" aria-label="Update">Edit</button>
-        <button class="iconBtn btn-sm" type="button" data-remove-port="${p.ticker}" aria-label="Remove">✕</button>
+        <button class="iconBtn btn-sm editBtn" type="button" data-edit-port="${p._id}" aria-label="Update">Edit</button>
+        <button class="iconBtn btn-sm" type="button" data-remove-port="${p._id}" aria-label="Remove">✕</button>
       </td>
     `;
 
     body.appendChild(tr);
   });
 
-  body.onclick = (e) => {
-      const editBtn = e.target.closest("[data-edit-port]");
-      if (editBtn) {
-        const ticker = editBtn.getAttribute("data-edit-port");
-        openEditModal(ticker);
-        return;
-      }
+  body.onclick = async (e) => {
+    const editBtn = e.target.closest("[data-edit-port]");
+    if (editBtn) {
+      const id = editBtn.getAttribute("data-edit-port");
+      openEditModal(id);
+      return;
+    }
 
-      const removeBtn = e.target.closest("[data-remove-port]");
-      if (removeBtn) {
-        const ticker = removeBtn.getAttribute("data-remove-port");
-        portfolio = portfolio.filter((p) => p.ticker !== ticker);
+    const removeBtn = e.target.closest("[data-remove-port]");
+    if (removeBtn) {
+      const id = removeBtn.getAttribute("data-remove-port");
 
-        initializeChartHistory();
-        renderAll();
+      try {
+        await deleteInvestment(id);
+        await loadData();
+      } catch (error) {
+        console.error(error);
+        showError("Failed to delete investment.");
       }
-    };
+    }
+  };
 }
 
 function renderSummary() {
@@ -170,6 +223,8 @@ function simulatePriceTick() {
     w.price = Math.max(0.01, +(w.price * (1 + step)).toFixed(2));
   });
 
+  // Visual-only live simulation for the current page session.
+  // DB values stay unchanged until explicit CRUD actions happen.
   portfolio.forEach((p) => {
     const match = watchlist.find((x) => x.ticker === p.ticker);
 
@@ -342,7 +397,14 @@ function renderChart() {
   bindChartTooltip({ svg, series });
 }
 
-function renderChartGrid({ grid, svgWidth, padding, usableHeight, maxValue, valueRange }) {
+function renderChartGrid({
+  grid,
+  svgWidth,
+  padding,
+  usableHeight,
+  maxValue,
+  valueRange,
+}) {
   grid.innerHTML = "";
 
   const lineCount = 5;
@@ -467,7 +529,7 @@ function openModal(mode = "portfolio") {
   if (!overlay) return;
 
   modalMode = mode;
-  editingTicker = null;
+  editingInvestmentId = null;
 
   const submitBtn = $("submitInvestmentBtn");
   if (submitBtn) submitBtn.textContent = "Add";
@@ -499,14 +561,15 @@ function openModal(mode = "portfolio") {
     sh.required = true;
   }
 }
-function openEditModal(ticker) {
+
+function openEditModal(id) {
   if (!overlay) return;
 
-  const item = portfolio.find((p) => p.ticker === ticker);
+  const item = portfolio.find((p) => p._id === id);
   if (!item) return showError("Investment not found.");
 
   modalMode = "edit";
-  editingTicker = ticker;
+  editingInvestmentId = id;
 
   overlay.classList.add("open");
   overlay.setAttribute("aria-hidden", "false");
@@ -546,16 +609,28 @@ function closeModal() {
   form.buyPrice.disabled = false;
   form.shares.disabled = false;
   form.shares.value = "1";
+
   const submitBtn = $("submitInvestmentBtn");
   if (submitBtn) submitBtn.textContent = "Add";
 
-  editingTicker = null;
+  editingInvestmentId = null;
 }
 
-if ($("openModalBtn")) $("openModalBtn").addEventListener("click", () => openModal("portfolio"));
-if ($("openWatchModalBtn")) $("openWatchModalBtn").addEventListener("click", () => openModal("watchlist"));
-if ($("closeModalBtn")) $("closeModalBtn").addEventListener("click", closeModal);
-if ($("cancelBtn")) $("cancelBtn").addEventListener("click", closeModal);
+if ($("openModalBtn")) {
+  $("openModalBtn").addEventListener("click", () => openModal("portfolio"));
+}
+
+if ($("openWatchModalBtn")) {
+  $("openWatchModalBtn").addEventListener("click", () => openModal("watchlist"));
+}
+
+if ($("closeModalBtn")) {
+  $("closeModalBtn").addEventListener("click", closeModal);
+}
+
+if ($("cancelBtn")) {
+  $("cancelBtn").addEventListener("click", closeModal);
+}
 
 if (overlay) {
   overlay.addEventListener("click", (e) => {
@@ -564,36 +639,12 @@ if (overlay) {
 }
 
 if ($("addForm")) {
-  $("addForm").addEventListener("submit", (e) => {
+  $("addForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const ticker = e.target.ticker.value.trim().toUpperCase();
     if (!ticker) return showError("Ticker is required.");
-    if (modalMode === "edit") {
-        const buyPrice = Number(e.target.buyPrice.value);
-        const shares = Number(e.target.shares.value);
 
-        if (!Number.isFinite(buyPrice) || buyPrice <= 0) {
-          return showError("Enter valid buy price.");
-        }
-
-        if (!Number.isFinite(shares) || shares <= 0) {
-          return showError("Enter valid shares.");
-        }
-
-        const item = portfolio.find((p) => p.ticker === editingTicker);
-        if (!item) {
-          return showError("Investment not found.");
-        }
-
-        item.buyPrice = +buyPrice.toFixed(2);
-        item.shares = +shares.toFixed(4);
-
-        initializeChartHistory();
-        closeModal();
-        renderAll();
-        return;
-      }
     if (modalMode === "watchlist") {
       if (watchlist.find((w) => w.ticker === ticker)) {
         return showError("Ticker already exists.");
@@ -618,37 +669,32 @@ if ($("addForm")) {
       return showError("Enter valid shares.");
     }
 
-    let currentPrice;
-    const watch = watchlist.find((x) => x.ticker === ticker);
+    try {
+      if (modalMode === "edit") {
+        await updateInvestment(editingInvestmentId, {
+          buyPrice: +buyPrice.toFixed(2),
+          shares: +shares.toFixed(4),
+        });
+      } else {
+        const watch = watchlist.find((x) => x.ticker === ticker);
+        const currentPrice = watch
+          ? watch.price
+          : +(buyPrice * (1 + (Math.random() - 0.5) * 0.05)).toFixed(2);
 
-    if (watch) {
-      currentPrice = watch.price;
-    } else {
-      currentPrice = +(buyPrice * (1 + (Math.random() - 0.5) * 0.05)).toFixed(2);
+        await createInvestment({
+          ticker,
+          buyPrice: +buyPrice.toFixed(2),
+          shares: +shares.toFixed(4),
+          current: currentPrice,
+        });
+      }
+
+      await loadData();
+      closeModal();
+    } catch (error) {
+      console.error(error);
+      showError("Failed to save investment.");
     }
-
-    const existing = portfolio.find((p) => p.ticker === ticker);
-
-    if (existing) {
-      const totalShares = existing.shares + shares;
-      const weightedBuy =
-        (existing.buyPrice * existing.shares + buyPrice * shares) / totalShares;
-
-      existing.shares = +totalShares.toFixed(4);
-      existing.buyPrice = +weightedBuy.toFixed(2);
-      existing.current = currentPrice;
-    } else {
-      portfolio.unshift({
-        ticker,
-        buyPrice: +buyPrice.toFixed(2),
-        shares: +shares.toFixed(4),
-        current: currentPrice,
-      });
-    }
-
-    initializeChartHistory();
-    closeModal();
-    renderAll();
   });
 }
 
@@ -658,20 +704,9 @@ if ($("addForm")) {
 
 bindChartRangeTabs();
 
-loadData().catch(() => {
-  watchlist = [
-    { ticker: "AAPL", price: 189.12, prev: 189.12 },
-    { ticker: "TSLA", price: 214.7, prev: 214.7 },
-    { ticker: "MSFT", price: 412.05, prev: 412.05 },
-  ];
-
-  portfolio = [
-    { ticker: "AAPL", buyPrice: 160.0, shares: 2, current: 189.12 },
-    { ticker: "MSFT", buyPrice: 350.0, shares: 1, current: 412.05 },
-  ];
-
-  initializeChartHistory();
-  renderAll();
+loadData().catch((error) => {
+  console.error(error);
+  showError("Could not load investments from the server.");
 });
 
 setInterval(simulatePriceTick, 4000);
