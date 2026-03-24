@@ -2,7 +2,7 @@ const express = require("express");
 const path = require("path");
 const dotenv = require("dotenv");
 const { connectDB } = require("./config/db");
-
+const cors = require("cors");
 const expenseRoutes = require("./routes/expense");
 const investmentRoutes = require("./routes/investment");
 const seedInvestments = require("./seed/seedInvestments");
@@ -16,7 +16,7 @@ app.use(express.json());
 
 connectDB();
 seedInvestments();
-
+app.use(cors());
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/investments", investmentRoutes);
 

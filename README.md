@@ -1,190 +1,248 @@
-Overview:-
 
-FinMate is a multi-page financial dashboard web application designed to help users track expenses, manage budgets, and monitor investments in a single interface.
-The goal of the application is to provide a clear overview of personal financial health through summarized metrics, visual charts, and categorized transaction tracking.
+# FinMate
 
-The Home page presents a complete financial snapshot, including:
+FinMate is a **personal finance dashboard web application** that helps users track expenses, manage budgets, and monitor investments from a single interface.
 
-1.Available balance after expenses
+The application provides a clear overview of financial health through summarized metrics, interactive charts, and categorized transaction tracking.
 
-2.Monthly subscription costs          
+---
 
-3.Total expenses
+# Features
 
-4.Investment cost basis
+## Home Dashboard
 
-5.Category breakdown pie chart
+The **Home page** provides a complete financial overview including:
 
-6.Top spending categories
+* Available balance after expenses
+* Monthly subscription costs
+* Total expenses
+* Investment cost basis
+* Category breakdown pie chart
+* Top spending categories
+* Income vs expenses comparison chart
+* Smart tips section for financial insights
 
-7.Income vs. expenses graph
+This dashboard allows users to quickly understand their current financial situation.
 
-8.Smart tips section indicating whether the user is within budget
+---
 
+## Expenses Management
 
-The Expenses page allows users to:
+The **Expenses page** allows users to track and manage spending.
 
-1.View total income (budget), total spent, and remaining balance
+Users can:
 
-2.Add new expenses by category, date, and amount
+* Set a **budget (total income)**
+* View **total spent**
+* See **remaining balance**
+* Add new expenses with:
 
-3.Review a list of recent expenses
+  * Category
+  * Title
+  * Amount
+  * Date
+* Edit existing expenses
+* Delete expenses
+* View a **spending-by-category chart**
+* Monitor recent expense history
 
-4.View spending distribution and summary insights
+All totals update automatically when expenses change.
 
+---
 
-The Investments page enables users to:
+## Investment Portfolio
 
-1.Track purchased stocks with live market prices
+The **Investments page** helps users monitor stock investments.
 
-2.View profit/loss percentages for each holding
+Features include:
 
-3.Maintain a watchlist of potential investments
+* Portfolio table displaying:
 
-4.Display a placeholder portfolio comparison chart
+  * Ticker
+  * Buy price
+  * Current price
+  * Shares
+  * Total value
+  * Profit/Loss percentage
+* Portfolio performance comparison
+* Watchlist for potential investments
+* Placeholder chart for cost vs market value comparison
 
+This page demonstrates portfolio tracking functionality.
 
-Future Extensions:-
+---
 
-FinMate can be extended by:
+# Technology Stack
 
-Connecting to a real database instead of JSON storage
+### Frontend
 
-Adding user authentication and secure login
+* React
+* React Router
+* Chart.js
+* Vite
 
-Integrating real financial APIs for live stock and subscription data
+### Backend
 
-Implementing advanced analytics and forecasting
+* Node.js
+* Express.js
 
-Supporting mobile responsiveness and accessibility improvements
+### Database
 
+* MongoDB
+* Mongoose
 
-How to use and navigate the Application:- 
+### Other Tools
 
+* Git & GitHub
+* REST API
+* LocalStorage (for budget persistence)
 
-FinMate is organized into three primary pages accessible from the top navigation bar:
+---
 
-1.Home
+# Project Structure
+
+```
+finmate
+│
+├── frontend
+│   ├── public
+│   ├── src
+│   │   ├── pages
+│   │   │   ├── HomePage.jsx
+│   │   │   ├── ExpensePage.jsx
+│   │   │   └── InvestmentPage.jsx
+│   │   ├── styles
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│
+├── server
+│   ├── config
+│   ├── models
+│   │   ├── expense.js
+│   │   └── investment.js
+│   ├── routes
+│   │   ├── expense.js
+│   │   └── investment.js
+│   ├── seed
+│   └── server.js
+│
+└── README.md
+```
 
-2.Expenses
+---
 
-3.Investments
+# Installation
 
-A profile icon in the top-right corner provides access to account-related options and demonstrates signed-in and signed-out interface states.
+Clone the repository
 
-Home Page – Financial Overview
+```
+git clone https://github.com/your-repo/finmate.git
+cd finmate
+```
 
-The Home page provides a high-level summary of the user’s financial status, including:
+---
 
-1.Available Balance after expenses
+## Install backend dependencies
 
-2.Monthly Subscriptions total
+```
+cd server
+npm install
+```
 
-3.Total Expenses
+Start backend server
 
-4.Investment Cost Basis (shares × average cost)
+```
+npm run start
+```
 
-Visual analytics are displayed below the summary:
+Server runs on:
 
-1.A pie chart showing expense allocation by category
+```
+http://localhost:8080
+```
 
-2.A Top Spendings panel listing the highest spending categories
+---
 
-3.An Income vs. Expenses graph illustrating financial trends over time
+## Install frontend dependencies
 
-At the bottom, a Smart Tips section analyzes spending behavior and indicates whether the user is within budget or exceeding limits.
+Open a new terminal
 
+```
+cd frontend
+npm install
+npm run dev
+```
 
-Expenses Page – Budgeting and Tracking
+Frontend runs on:
 
-The Expenses page allows users to manage their spending:
+```
+http://localhost:5173
+```
 
-1.Displays Total Income (budget), Total Spent, and Remaining Balance
+---
 
-2.Provides a form to add a new expense by:
+# API Endpoints
 
-- Selecting a category
+## Expenses
 
-- Entering an amount
+```
+GET     /api/expenses
+POST    /api/expenses
+PUT     /api/expenses/:id
+DELETE  /api/expenses/:id
+```
 
-- Choosing a date
+## Investments
 
-3.Shows a scrollable list of recent expenses with delete actions
+```
+GET     /api/investments
+POST    /api/investments
+PUT     /api/investments/:id
+DELETE  /api/investments/:id
+```
 
-4.Includes:
+---
 
-- A spending-by-category pie chart
+# Future Extensions
 
-- A summary panel describing overall budget status
+FinMate can be expanded with additional features including:
 
-This page supports continuous tracking and real-time updates to totals.
+* User authentication and login system
+* Secure financial data storage
+* Integration with real financial APIs for live stock prices
+* Subscription detection
+* Advanced analytics and forecasting
+* Mobile responsiveness improvements
+* Notification system for budget alerts
 
+---
 
-Investments Page – Portfolio Monitoring
+# Learning Outcomes
 
-The Investments page enables users to monitor stock activity:
+This project provided practical experience in:
 
-1.Displays a portfolio table containing:
+* Building a **full-stack MERN application**
+* Designing REST APIs
+* Managing state in React
+* Creating financial visualizations with Chart.js
+* Implementing CRUD operations with MongoDB
+* Collaborating using Git branches and pull requests
 
-- Ticker symbol
+---
 
-- Purchase price
+# Reflection
 
-- Current market price
+Developing FinMate required coordinating multiple application layers including the frontend interface, backend API, and database models.
 
-- Number of shares
+Key challenges included:
 
-- Total value
+* Maintaining consistent UI across multiple pages
+* Integrating chart visualizations with live data
+* Managing Git branching and team collaboration
+* Synchronizing financial summaries across pages
 
-- Profit/Loss percentage with visual indicators
+Despite these challenges, the project successfully demonstrates a functional financial dashboard prototype capable of expense tracking, budget monitoring, and portfolio visualization.
 
-2.Provides a watchlist for tracking potential investments before purchase
+FinMate provides a strong foundation that can be extended into a full personal finance management platform.
 
-3.Includes a portfolio comparison chart placeholder for future visualization of cost vs. market value
 
-Market values update dynamically to simulate real-time tracking.
-
-
-Profile Menu Interaction
-
-Clicking the profile icon opens a dropdown interface that demonstrates two states:
-
-1.Signed-out state
-
-- Sign in
-
-- Create account
-
-- Settings
-
-- Help & Support
-
-2.Signed-in state
-
-- Personalized welcome message
-
-- Last login time in Eastern Time (ET)
-
-- Quick-access account actions
-
-- Logout option
-
-Authentication is simulated using local browser storage for demonstration purposes.
-
-
-Reflection:-
-
-This project provided practical experience in designing and implementing a multi-page web application using Node.js, Express, and static front-end technologies.
-A key learning outcome was understanding how client–server interaction works without a database by using structured JSON data and REST-style endpoints.
-
-One of the main challenges involved:
-
-1.Coordinating multiple UI pages while keeping navigation and styling consistent
-
-2.Managing Git branching, pull requests, and team collaboration workflows
-
-3.Implementing dynamic financial visualizations and summaries
-
-
-Despite these challenges, the project was successful in delivering a fully functional financial dashboard prototype that clearly demonstrates expense tracking, budget monitoring, investment portfolio visualization and multi-page navigation with interactive UI components
-Overall, FinMate represents a strong foundation that can be expanded into a complete real-world personal finance management system in future assignments.
