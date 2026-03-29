@@ -110,7 +110,6 @@ function notifyUserChanged() {
 
     renderMenu();
     notifyUserChanged();
-    emitUserChanged(); // ✅ tell pages to refresh greeting
   }
 
   if (btnSignIn) btnSignIn.addEventListener("click", () => fakeSignIn("signin"));

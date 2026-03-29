@@ -96,7 +96,7 @@ function renderWelcomeTitle() {
 
 async function fetchInvestments() {
   try {
-    const res = await fetch("/api/invest");
+    const res = await fetch("/api/investments");
     if (!res.ok) throw new Error();
     const data = await res.json();
 

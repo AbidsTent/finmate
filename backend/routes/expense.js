@@ -2,6 +2,21 @@ const express = require("express");
 const router = express.Router();
 const Expense = require("../models/expense");
 
+// READ single expense
+router.get("/:id", async (req, res) => {
+  try {
+    const expense = await Expense.findById(req.params.id);
+
+    if (!expense) {
+      return res.status(404).json({ message: "Expense not found" });
+    }
+
+    res.json(expense);
+  } catch {
+    res.status(500).json({ message: "Failed to fetch expense" });
+  }
+});
+
 // READ multiple
 router.get("/", async (req, res) => {
   try {
