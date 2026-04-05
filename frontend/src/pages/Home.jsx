@@ -3,6 +3,7 @@ import { getExpenses } from "../services/expenseApi";
 import { getInvestments } from "../services/investmentApi";
 import { Link } from "react-router";
 import { Doughnut, Line } from "react-chartjs-2";
+import { getBudgetKey, getUser } from "../utils/storage";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -158,7 +159,7 @@ const smartTips = buildTips(spending);
 const BUDGET_KEY = "finmate_budget";
 
 function getBudget() {
-  const raw = localStorage.getItem(BUDGET_KEY);
+  const raw = localStorage.getItem(getBudgetKey());
   const num = Number(raw);
   return Number.isFinite(num) && num >= 0 ? num : 0;
 }
@@ -261,7 +262,7 @@ const trendChartOptions = {
     <>
       <header className="hero">
         <div>
-          <h1 id="welcomeTitle">Hello User</h1>
+          <h1 id="welcomeTitle">Hello {getUser()?.name || "User"}</h1>
           <p className="muted">
             Here’s your overview report for the selected period.
           </p>

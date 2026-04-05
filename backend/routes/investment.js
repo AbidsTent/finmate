@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const Investment = require("../models/investment");
+const { protect } = require("../middleware/authMiddleware");
 
-// GET all investments
-router.get("/", async (req, res) => {
+router.get("/", protect, async (req, res) => {
   try {
-    const investments = await Investment.find().sort({ createdAt: -1 });
+    const investments = await Investment.find({ user: req.user._id }).sort({ createdAt: -1 });
     res.status(200).json(investments);
   } catch (error) {
     res.status(500).json({
@@ -15,10 +15,12 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET one investment
-router.get("/:id", async (req, res) => {
+router.get("/:id", protect, async (req, res) => {
   try {
-    const investment = await Investment.findById(req.params.id);
+    const investment = await Investment.findOne({
+      _id: req.params.id,
+      user: req.user._id,
+    });
 
     if (!investment) {
       return res.status(404).json({ message: "Investment not found" });
@@ -33,8 +35,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// CREATE 
-router.post("/", async (req, res) => {
+router.post("/", protect, async (req, res) => {
   try {
     const { ticker, shares, buyPrice, current, buyDate } = req.body;
 
@@ -50,6 +51,7 @@ router.post("/", async (req, res) => {
       buyPrice,
       current: current ?? 0,
       buyDate: buyDate ?? "",
+      user: req.user._id,
     });
 
     res.status(201).json(newInvestment);
@@ -61,11 +63,10 @@ router.post("/", async (req, res) => {
   }
 });
 
-// UPDATE
-router.put("/:id", async (req, res) => {
+router.put("/:id", protect, async (req, res) => {
   try {
-    const updatedInvestment = await Investment.findByIdAndUpdate(
-      req.params.id,
+    const updatedInvestment = await Investment.findOneAndUpdate(
+      { _id: req.params.id, user: req.user._id },
       req.body,
       { new: true, runValidators: true }
     );
@@ -83,10 +84,12 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// DELETE 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", protect, async (req, res) => {
   try {
-    const deletedInvestment = await Investment.findByIdAndDelete(req.params.id);
+    const deletedInvestment = await Investment.findOneAndDelete({
+      _id: req.params.id,
+      user: req.user._id,
+    });
 
     if (!deletedInvestment) {
       return res.status(404).json({ message: "Investment not found" });
