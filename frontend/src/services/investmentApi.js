@@ -1,7 +1,50 @@
 const BASE_URL = "http://localhost:8080/api/investments";
 
+async function parseJsonResponse(res, fallbackMessage) {
+  const data = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    const message = data?.message || fallbackMessage;
+    throw new Error(message);
+  }
+
+  return data;
+}
+
 export async function getInvestments() {
   const res = await fetch(BASE_URL);
-  if (!res.ok) throw new Error("Failed to fetch investments");
-  return res.json();
+  return parseJsonResponse(res, "Failed to fetch investments");
+}
+
+export async function getInvestmentById(id) {
+  const res = await fetch(`${BASE_URL}/${id}`);
+  return parseJsonResponse(res, "Failed to fetch investment");
+}
+
+export async function createInvestment(payload) {
+  const res = await fetch(BASE_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  return parseJsonResponse(res, "Failed to create investment");
+}
+
+export async function updateInvestment(id, payload) {
+  const res = await fetch(`${BASE_URL}/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  return parseJsonResponse(res, "Failed to update investment");
+}
+
+export async function deleteInvestment(id) {
+  const res = await fetch(`${BASE_URL}/${id}`, {
+    method: "DELETE",
+  });
+
+  return parseJsonResponse(res, "Failed to delete investment");
 }
