@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Investment = require("../models/investment");
 const { protect } = require("../middleware/authMiddleware");
+const generateDisplayId = require("../utils/generateDisplayId");
 
 router.get("/", protect, async (req, res) => {
   try {
@@ -45,7 +46,10 @@ router.post("/", protect, async (req, res) => {
       });
     }
 
+    const displayId = await generateDisplayId(Investment, "INV");
+
     const newInvestment = await Investment.create({
+      displayId,
       ticker: String(ticker).trim().toUpperCase(),
       shares,
       buyPrice,

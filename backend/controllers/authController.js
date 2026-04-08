@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
+const generateDisplayId = require("../utils/generateDisplayId");
 
 function createToken(user) {
   return jwt.sign(
@@ -28,8 +29,10 @@ async function registerUser(req, res) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const displayId = await generateDisplayId(User, "USR");
 
     const user = await User.create({
+      displayId,
       name: name.trim(),
       email: email.toLowerCase().trim(),
       password: hashedPassword,
@@ -42,6 +45,7 @@ async function registerUser(req, res) {
       token,
       user: {
         id: user._id,
+        displayId: user.displayId,
         name: user.name,
         email: user.email,
       },

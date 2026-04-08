@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 
 const expenseSchema = new mongoose.Schema(
   {
+    displayId: {
+      type: String,
+      unique: true,
+      trim: true,
+    },
     title: {
       type: String,
       required: true,

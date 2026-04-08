@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 
 const investmentSchema = new mongoose.Schema(
   {
+    displayId: {
+      type: String,
+      unique: true,
+      trim: true,
+    },
     ticker: {
       type: String,
       required: true,

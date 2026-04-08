@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Expense = require("../models/expense");
 const { protect } = require("../middleware/authMiddleware");
+const generateDisplayId = require("../utils/generateDisplayId");
 
 router.get("/:id", protect, async (req, res) => {
   try {
@@ -32,8 +33,10 @@ router.get("/", protect, async (req, res) => {
 router.post("/", protect, async (req, res) => {
   try {
     const { title, amount, category, date } = req.body;
+    const displayId = await generateDisplayId(Expense, "EXP");
 
     const expense = new Expense({
+      displayId,
       title,
       amount,
       category,
