@@ -9,13 +9,31 @@ function authHeaders(extra = {}) {
   };
 }
 
+async function parseJsonResponse(res, fallbackMessage) {
+  const data = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    const message = data?.message || fallbackMessage;
+    throw new Error(message);
+  }
+
+  return data;
+}
+
 export async function getInvestments() {
   const res = await fetch(BASE_URL, {
     headers: authHeaders(),
   });
 
-  if (!res.ok) throw new Error("Failed to fetch investments");
-  return res.json();
+  return parseJsonResponse(res, "Failed to fetch investments");
+}
+
+export async function getInvestmentById(id) {
+  const res = await fetch(`${BASE_URL}/${id}`, {
+    headers: authHeaders(),
+  });
+
+  return parseJsonResponse(res, "Failed to fetch investment");
 }
 
 export async function createInvestment(payload) {
@@ -25,8 +43,7 @@ export async function createInvestment(payload) {
     body: JSON.stringify(payload),
   });
 
-  if (!res.ok) throw new Error("Failed to create investment");
-  return res.json();
+  return parseJsonResponse(res, "Failed to create investment");
 }
 
 export async function updateInvestment(id, payload) {
@@ -36,8 +53,7 @@ export async function updateInvestment(id, payload) {
     body: JSON.stringify(payload),
   });
 
-  if (!res.ok) throw new Error("Failed to update investment");
-  return res.json();
+  return parseJsonResponse(res, "Failed to update investment");
 }
 
 export async function deleteInvestment(id) {
@@ -46,6 +62,5 @@ export async function deleteInvestment(id) {
     headers: authHeaders(),
   });
 
-  if (!res.ok) throw new Error("Failed to delete investment");
-  return res.json();
+  return parseJsonResponse(res, "Failed to delete investment");
 }

@@ -1,143 +1,126 @@
 import { useEffect, useState } from "react";
+import InvestmentForm from "../components/investments/InvestmentForm";
+import InvestmentTable from "../components/investments/InvestmentTable";
+import InvestmentSummary from "../components/investments/InvestmentSummary";
 import {
-  getInvestments,
   createInvestment,
-  updateInvestment,
   deleteInvestment,
+  getInvestments,
+  updateInvestment,
 } from "../services/investmentApi";
 
 export default function Investments() {
   const [investments, setInvestments] = useState([]);
-  const [form, setForm] = useState({
-    ticker: "",
-    shares: "",
-    buyPrice: "",
-    current: "",
-    buyDate: "",
-  });
+  const [editingInvestment, setEditingInvestment] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     loadInvestments();
   }, []);
 
   async function loadInvestments() {
-    const data = await getInvestments();
-    setInvestments(data || []);
+    setLoading(true);
+    setError("");
+
+    try {
+      const data = await getInvestments();
+      setInvestments(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setError(err.message || "Failed to load investments");
+    } finally {
+      setLoading(false);
+    }
   }
 
-  function handleChange(e) {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  async function handleCreateOrUpdate(payload) {
+    setSaving(true);
+    setError("");
+
+    try {
+      if (editingInvestment?._id) {
+        const updated = await updateInvestment(editingInvestment._id, payload);
+
+        setInvestments((prev) =>
+          prev.map((item) => (item._id === updated._id ? updated : item))
+        );
+        setEditingInvestment(null);
+        return;
+      }
+
+      const created = await createInvestment(payload);
+      setInvestments((prev) => [created, ...prev]);
+    } catch (err) {
+      setError(err.message || "Failed to save investment");
+      throw err;
+    } finally {
+      setSaving(false);
+    }
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    await createInvestment(form);
-    setForm({
-      ticker: "",
-      shares: "",
-      buyPrice: "",
-      current: "",
-      buyDate: "",
-    });
-    loadInvestments();
-  }
+  async function handleDelete(item) {
+    const shouldDelete = window.confirm(`Delete ${item.ticker} investment?`);
+    if (!shouldDelete) return;
 
-  async function handleDelete(id) {
-    await deleteInvestment(id);
-    loadInvestments();
-  }
+    setDeletingId(item._id);
+    setError("");
 
-  async function handleEdit(item) {
-    const ticker = prompt("Ticker:", item.ticker);
-    const shares = prompt("Shares:", item.shares);
-    const buyPrice = prompt("Buy Price:", item.buyPrice);
-    const current = prompt("Current Price:", item.current);
-    const buyDate = prompt("Buy Date:", item.buyDate);
+    try {
+      await deleteInvestment(item._id);
+      setInvestments((prev) => prev.filter((inv) => inv._id !== item._id));
 
-    await updateInvestment(item._id, {
-      ticker,
-      shares,
-      buyPrice,
-      current,
-      buyDate,
-    });
-
-    loadInvestments();
+      if (editingInvestment?._id === item._id) {
+        setEditingInvestment(null);
+      }
+    } catch (err) {
+      setError(err.message || "Failed to delete investment");
+    } finally {
+      setDeletingId(null);
+    }
   }
 
   return (
     <section>
-      <header className="hero">
+      <header className="hero invest-hero">
         <div>
           <h1>Investments</h1>
-          <p className="muted">Track and manage your portfolio.</p>
+          <p className="muted">Track your portfolio with full CRUD actions.</p>
         </div>
       </header>
 
-      <div className="panel">
-        <div className="panelTitle">Add Investment</div>
-        <form className="form" onSubmit={handleSubmit}>
-          <label className="field">
-            <span className="muted">Ticker</span>
-            <input className="input" name="ticker" value={form.ticker} onChange={handleChange} required />
-          </label>
-
-          <label className="field">
-            <span className="muted">Shares</span>
-            <input className="input" type="number" name="shares" value={form.shares} onChange={handleChange} required />
-          </label>
-
-          <label className="field">
-            <span className="muted">Buy Price</span>
-            <input className="input" type="number" name="buyPrice" value={form.buyPrice} onChange={handleChange} required />
-          </label>
-
-          <label className="field">
-            <span className="muted">Current Price</span>
-            <input className="input" type="number" name="current" value={form.current} onChange={handleChange} />
-          </label>
-
-          <label className="field">
-            <span className="muted">Buy Date</span>
-            <input className="input" type="date" name="buyDate" value={form.buyDate} onChange={handleChange} />
-          </label>
-
-          <button className="btn" type="submit">+ Add Investment</button>
-        </form>
-      </div>
-
-      <div className="panel">
-        <div className="panelTitle">Portfolio</div>
-        <div className="tableWrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Ticker</th>
-                <th>Shares</th>
-                <th>Buy Price</th>
-                <th>Current</th>
-                <th>Buy Date</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {investments.map((item) => (
-                <tr key={item._id}>
-                  <td>{item.ticker}</td>
-                  <td>{item.shares}</td>
-                  <td>${Number(item.buyPrice).toFixed(2)}</td>
-                  <td>${Number(item.current).toFixed(2)}</td>
-                  <td>{item.buyDate}</td>
-                  <td>
-                    <button className="btn" onClick={() => handleEdit(item)}>Edit</button>{" "}
-                    <button className="btn btn-secondary" onClick={() => handleDelete(item._id)}>Delete</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {error && (
+        <div className="error muted" style={{ display: "block", marginBottom: 16 }}>
+          {error}
         </div>
-      </div>
+      )}
+
+      <InvestmentSummary investments={investments} />
+
+      <section className="grid2">
+        <InvestmentForm
+          mode={editingInvestment ? "edit" : "create"}
+          initialValues={editingInvestment}
+          submitting={saving}
+          onSubmit={handleCreateOrUpdate}
+          onCancelEdit={() => setEditingInvestment(null)}
+        />
+
+        <InvestmentTable
+          investments={investments}
+          loading={loading}
+          deletingId={deletingId}
+          onEdit={setEditingInvestment}
+          onDelete={handleDelete}
+        />
+      </section>
+
+      {!loading && !investments.length && !error && (
+        <p className="muted" style={{ marginTop: 12 }}>
+          Tip: create your first investment using the form above.
+        </p>
+      )}
     </section>
   );
 }
