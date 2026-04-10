@@ -3,9 +3,11 @@ import { getToken } from "../utils/storage";
 const BASE_URL = "http://localhost:8080/api/expenses";
 
 function authHeaders(extra = {}) {
+  const token = getToken();
+
   return {
     ...extra,
-    Authorization: `Bearer ${getToken()}`,
+    Authorization: `Bearer ${token}`,
   };
 }
 
@@ -18,13 +20,19 @@ export async function getExpenses() {
   return res.json();
 }
 
+export async function getExpenseById(id) {
+  const res = await fetch(`${BASE_URL}/${id}`, {
+    headers: authHeaders(),
+  });
+
+  if (!res.ok) throw new Error("Failed to fetch expense");
+  return res.json();
+}
+
 export async function createExpense(payload) {
   const res = await fetch(BASE_URL, {
     method: "POST",
     headers: authHeaders({ "Content-Type": "application/json" }),
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(payload),
   });
 
@@ -36,9 +44,6 @@ export async function updateExpense(id, payload) {
   const res = await fetch(`${BASE_URL}/${id}`, {
     method: "PUT",
     headers: authHeaders({ "Content-Type": "application/json" }),
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(payload),
   });
 

@@ -161,7 +161,12 @@ const BUDGET_KEY = "finmate_budget";
 function getBudget() {
   const raw = localStorage.getItem(getBudgetKey());
   const num = Number(raw);
-  return Number.isFinite(num) && num >= 0 ? num : 0;
+  if (!Number.isFinite(num) || num < 0) {
+    // Set a default budget if none exists
+    localStorage.setItem(getBudgetKey(), "0");
+    return 0;
+  }
+  return num;
 }
 
 const budget = getBudget();
