@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 
 const investmentSchema = new mongoose.Schema(
   {
+    displayId: {
+      type: String,
+      unique: true,
+      trim: true,
+    },
     ticker: {
       type: String,
       required: true,
@@ -26,6 +31,11 @@ const investmentSchema = new mongoose.Schema(
     buyDate: {
       type: String,
       default: "",
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
   },
   { timestamps: true }

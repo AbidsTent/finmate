@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   getExpenses,
@@ -5,6 +6,67 @@ import {
   updateExpense,
   deleteExpense,
 } from "../services/expenseApi";
+import { getBudgetKey } from "../utils/storage";
+
+export default function Expenses() {
+  const [expenses, setExpenses] = useState([]);
+  const [form, setForm] = useState({
+    title: "",
+    amount: "",
+    category: "",
+    date: "",
+  });
+  const [budget, setBudget] = useState(0);
+
+  useEffect(() => {
+    loadExpenses();
+    const raw = localStorage.getItem(getBudgetKey());
+    setBudget(Number(raw) || 0);
+  }, []);
+
+  async function loadExpenses() {
+    const data = await getExpenses();
+    setExpenses(data || []);
+  }
+
+  function handleChange(e) {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    await createExpense(form);
+    setForm({ title: "", amount: "", category: "", date: "" });
+    loadExpenses();
+  }
+
+  async function handleDelete(id) {
+    await deleteExpense(id);
+    loadExpenses();
+  }
+
+  async function handleEdit(item) {
+    const title = prompt("Edit title:", item.title);
+    const category = prompt("Edit category:", item.category);
+    const amount = prompt("Edit amount:", item.amount);
+    const date = prompt("Edit date:", item.date);
+
+    await updateExpense(item._id, { title, category, amount, date });
+    loadExpenses();
+  }
+
+  function saveBudget() {
+    localStorage.setItem(getBudgetKey(), String(budget));
+  }
+
+  const totalSpent = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
+  const remaining = budget - totalSpent;
+
+  return (
+    <section>
+      <header className="hero">
+        <div>
+          <h1>💳 Expense Manager</h1>
 
 const BUDGET_KEY = "finmate_budget";
 
@@ -261,6 +323,16 @@ export default function Expenses() {
       <section className="cards cards-3">
         <div className="card">
           <div className="label">Total Income</div>
+          <div className="value">${budget.toFixed(2)}</div>
+          <div className="hint muted">
+            <span className="muted">Set budget:</span>
+            <input
+              className="input"
+              type="number"
+              value={budget}
+              onChange={(e) => setBudget(Number(e.target.value))}
+            />
+            <button className="btn btn-secondary" type="button" onClick={saveBudget}>
           <div className="value">{money(budget)}</div>
           <div className="hint muted">
             <span className="muted">Set budget:</span>
@@ -285,12 +357,14 @@ export default function Expenses() {
 
         <div className="card">
           <div className="label">Total Spent</div>
+          <div className="value">${totalSpent.toFixed(2)}</div>
           <div className="value">{money(totalSpent)}</div>
           <div className="hint muted">Sum of all expenses</div>
         </div>
 
         <div className="card">
           <div className="label">Remaining</div>
+          <div className="value">${remaining.toFixed(2)}</div>
           <div className="value">{money(remaining)}</div>
           <div className="hint muted">Budget - Spent</div>
         </div>
@@ -299,6 +373,17 @@ export default function Expenses() {
       <section className="grid2">
         <div className="panel">
           <div className="panelTitle">Add Expense</div>
+          <form className="form" onSubmit={handleSubmit}>
+            <label className="field">
+              <span className="muted">Category</span>
+              <select className="select" name="category" value={form.category} onChange={handleChange} required>
+                <option value="">Select category</option>
+                <option>Food</option>
+                <option>Transport</option>
+                <option>Housing</option>
+                <option>Entertainment</option>
+                <option>Subscriptions</option>
+                <option>Misc</option>
 
           <form className="form" onSubmit={handleFormSubmit}>
             <label className="field">
@@ -322,6 +407,7 @@ export default function Expenses() {
 
             <label className="field">
               <span className="muted">Title</span>
+              <input className="input" name="title" value={form.title} onChange={handleChange} required />
               <input
                 className="input"
                 name="title"
@@ -335,6 +421,7 @@ export default function Expenses() {
 
             <label className="field">
               <span className="muted">Amount</span>
+              <input className="input" type="number" name="amount" value={form.amount} onChange={handleChange} required />
               <input
                 className="input"
                 name="amount"
@@ -350,6 +437,10 @@ export default function Expenses() {
 
             <label className="field">
               <span className="muted">Date</span>
+              <input className="input" type="date" name="date" value={form.date} onChange={handleChange} required />
+            </label>
+
+            <button className="btn" type="submit">+ Add Expense</button>
               <input
                 className="input"
                 name="date"
@@ -385,6 +476,15 @@ export default function Expenses() {
                 </tr>
               </thead>
               <tbody>
+                {expenses.map((e) => (
+                  <tr key={e._id}>
+                    <td>{e.title}</td>
+                    <td>{e.category}</td>
+                    <td>${Number(e.amount).toFixed(2)}</td>
+                    <td>{e.date}</td>
+                    <td>
+                      <button className="btn" onClick={() => handleEdit(e)}>Edit</button>{" "}
+                      <button className="btn btn-secondary" onClick={() => handleDelete(e._id)}>Delete</button>
                 {expenses.map((expense) => (
                   <tr key={expense._id}>
                     <td>{expense.title}</td>
@@ -412,6 +512,9 @@ export default function Expenses() {
               </tbody>
             </table>
           </div>
+        </div>
+      </section>
+    </section>
 
           <div className="muted" style={{ marginTop: "10px" }}>
             {loading ? "Loading..." : listMsg}

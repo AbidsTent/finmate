@@ -1,38 +1,32 @@
 const express = require("express");
-const path = require("path");
 const dotenv = require("dotenv");
-const { connectDB } = require("./config/db");
 const cors = require("cors");
+const { connectDB } = require("./config/db");
+
+const authRoutes = require("./routes/auth");
 const expenseRoutes = require("./routes/expense");
 const investmentRoutes = require("./routes/investment");
-const seedInvestments = require("./seed/seedInvestments");
 
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true,
+}));
+
 app.use(express.json());
 
 connectDB();
-seedInvestments();
-app.use(cors());
+
+app.use("/api/auth", authRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/investments", investmentRoutes);
 
-const publicPath = path.join(__dirname, "..", "frontend", "public");
-app.use(express.static(publicPath));
-
 app.get("/", (req, res) => {
-  res.sendFile(path.join(publicPath, "home.html"));
-});
-
-app.get("/expenses", (req, res) => {
-  res.sendFile(path.join(publicPath, "expense.html"));
-});
-
-app.get("/investments", (req, res) => {
-  res.sendFile(path.join(publicPath, "invest.html"));
+  res.send("FinMate API is running");
 });
 
 app.listen(PORT, () => {
