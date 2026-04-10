@@ -3,7 +3,7 @@ import { getExpenses } from "../services/expenseApi";
 import { getInvestments } from "../services/investmentApi";
 import { Link } from "react-router";
 import { Doughnut, Line } from "react-chartjs-2";
-import { getBudgetKey, getUser } from "../utils/storage";
+import { getBudgetKey, getStoredBudget, getUser } from "../utils/storage";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -14,6 +14,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+
 
 ChartJS.register(
   ArcElement,
@@ -159,7 +160,7 @@ const smartTips = buildTips(spending);
 const BUDGET_KEY = "finmate_budget";
 
 function getBudget() {
-  const raw = localStorage.getItem(getBudgetKey());
+  const raw = getStoredBudget();
   const num = Number(raw);
   if (!Number.isFinite(num) || num < 0) {
     // Set a default budget if none exists

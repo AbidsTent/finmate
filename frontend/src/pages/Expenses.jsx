@@ -6,7 +6,7 @@ import {
   deleteExpense,
 } from "../services/expenseApi";
 
-const BUDGET_KEY = "finmate_budget";
+import { getStoredBudget, setStoredBudget } from "../utils/storage";
 
 const initialForm = {
   title: "",
@@ -32,7 +32,7 @@ export default function Expenses() {
   const pieCanvasRef = useRef(null);
 
   useEffect(() => {
-    const savedBudget = Number(localStorage.getItem(BUDGET_KEY));
+    const savedBudget = Number(getStoredBudget());
     if (Number.isFinite(savedBudget) && savedBudget >= 0) {
       setBudget(savedBudget);
       setBudgetInput(savedBudget ? String(savedBudget) : "");
@@ -155,7 +155,7 @@ export default function Expenses() {
       return;
     }
 
-    localStorage.setItem(BUDGET_KEY, String(val));
+    setStoredBudget(String(val));
     setBudget(val);
     setBudgetInput(String(val));
   }
