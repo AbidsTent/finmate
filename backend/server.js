@@ -1,4 +1,7 @@
 const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
+const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const { connectDB } = require("./config/db");
@@ -10,13 +13,50 @@ const investmentRoutes = require("./routes/investment");
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 8080;
 
-app.use(cors({
+const corsOptions = {
   origin: "http://localhost:5173",
   credentials: true,
-}));
+};
 
+const io = new Server(server, {
+  cors: corsOptions,
+});
+
+io.use((socket, next) => {
+  try {
+    const token = socket.handshake.auth?.token;
+
+    if (!token) {
+      return next(new Error("Socket auth failed: token missing"));
+    }
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "finmate_secret_key"
+    );
+
+    socket.userId = decoded.id;
+    return next();
+  } catch {
+    return next(new Error("Socket auth failed: invalid token"));
+  }
+});
+
+io.on("connection", (socket) => {
+  const room = `user:${socket.userId}`;
+  socket.join(room);
+
+  socket.on("disconnect", () => {
+    socket.leave(room);
+  });
+});
+
+app.set("io", io);
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 connectDB();
@@ -29,6 +69,6 @@ app.get("/", (req, res) => {
   res.send("FinMate API is running");
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
 });
