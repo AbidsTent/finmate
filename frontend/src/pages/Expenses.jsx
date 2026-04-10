@@ -5,8 +5,12 @@ import {
   updateExpense,
   deleteExpense,
 } from "../services/expenseApi";
+import {
+  connectExpenseSocket,
+  disconnectExpenseSocket,
+} from "../services/expenseSocket";
 
-import { getStoredBudget, setStoredBudget } from "../utils/storage";
+import { getStoredBudget, getToken, setStoredBudget } from "../utils/storage";
 
 const initialForm = {
   title: "",
@@ -27,6 +31,7 @@ export default function Expenses() {
 
   const [formMsg, setFormMsg] = useState("");
   const [listMsg, setListMsg] = useState("");
+  const [liveMsg, setLiveMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
   const pieCanvasRef = useRef(null);
@@ -39,6 +44,34 @@ export default function Expenses() {
     }
 
     loadExpenses();
+  }, []);
+
+  useEffect(() => {
+    const token = getToken();
+    const socket = connectExpenseSocket(token);
+
+    if (!socket) return;
+
+    const onExpenseChanged = async (event) => {
+      if (event?.action === "added") setLiveMsg("Live update: Expense added");
+      if (event?.action === "updated") setLiveMsg("Live update: Expense updated");
+      if (event?.action === "deleted") setLiveMsg("Live update: Expense deleted");
+
+      await loadExpenses();
+
+      window.clearTimeout(window.__finmateLiveMsgTimer);
+      window.__finmateLiveMsgTimer = window.setTimeout(() => {
+        setLiveMsg("");
+      }, 2200);
+    };
+
+    socket.on("expense:changed", onExpenseChanged);
+
+    return () => {
+      socket.off("expense:changed", onExpenseChanged);
+      disconnectExpenseSocket();
+      window.clearTimeout(window.__finmateLiveMsgTimer);
+    };
   }, []);
 
   useEffect(() => {
@@ -415,6 +448,9 @@ export default function Expenses() {
 
           <div className="muted" style={{ marginTop: "10px" }}>
             {loading ? "Loading..." : listMsg}
+          </div>
+          <div className="muted" style={{ marginTop: "6px" }}>
+            {liveMsg}
           </div>
         </div>
 

@@ -4,6 +4,17 @@ const Expense = require("../models/expense");
 const { protect } = require("../middleware/authMiddleware");
 const generateDisplayId = require("../utils/generateDisplayId");
 
+function emitExpenseEvent(req, action, expense) {
+  const io = req.app.get("io");
+  if (!io) return;
+
+  io.to(`user:${req.user._id.toString()}`).emit("expense:changed", {
+    action,
+    expenseId: expense?._id?.toString(),
+    at: new Date().toISOString(),
+  });
+}
+
 router.get("/:id", protect, async (req, res) => {
   try {
     const expense = await Expense.findOne({
@@ -45,6 +56,7 @@ router.post("/", protect, async (req, res) => {
     });
 
     await expense.save();
+    emitExpenseEvent(req, "added", expense);
     res.status(201).json(expense);
   } catch {
     res.status(500).json({ message: "Failed to create expense" });
@@ -63,6 +75,7 @@ router.put("/:id", protect, async (req, res) => {
       return res.status(404).json({ message: "Expense not found" });
     }
 
+    emitExpenseEvent(req, "updated", updated);
     res.json(updated);
   } catch {
     res.status(500).json({ message: "Failed to update expense" });
@@ -80,6 +93,7 @@ router.delete("/:id", protect, async (req, res) => {
       return res.status(404).json({ message: "Expense not found" });
     }
 
+    emitExpenseEvent(req, "deleted", deleted);
     res.json({ message: "Expense deleted" });
   } catch {
     res.status(500).json({ message: "Failed to delete expense" });
