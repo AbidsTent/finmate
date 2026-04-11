@@ -62,7 +62,7 @@ export default function Expenses() {
       window.clearTimeout(window.__finmateLiveMsgTimer);
       window.__finmateLiveMsgTimer = window.setTimeout(() => {
         setLiveMsg("");
-      }, 2200);
+      }, 6000);
     };
 
     socket.on("expense:changed", onExpenseChanged);
