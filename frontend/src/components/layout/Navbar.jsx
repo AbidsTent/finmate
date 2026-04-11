@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { clearAuth, getUser, isLoggedIn } from "../../utils/storage";
-
+import finmateLogo from "../../assets/finmate.png";
 export default function Navbar() {
   const navigate = useNavigate();
   const user = getUser();
@@ -14,6 +14,7 @@ export default function Navbar() {
     <nav className="navbar">
       <div className="nav-left">
         <div className="logo">
+          <img src={finmateLogo} alt="Finmate logo" className="logo-icon" />
           <span>Finmate</span>
         </div>
       </div>
